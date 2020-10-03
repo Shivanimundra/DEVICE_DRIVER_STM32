@@ -1,0 +1,45 @@
+#include "stm32f407xx.h"
+
+
+int myticks = 0;
+void TIM4_IRQHandler(void);
+void delay_ms(int);
+
+
+int main()
+{
+	
+RCC->AHB1ENR |= (1<<3); // initialize the clock of GPIOD for led
+GPIOD->MODER |= (0X55<<24); // O/P MODE
+	
+RCC->APB1ENR |= 0X04; // enable the timer clock
+TIM4->CR1 |= 0X01; // counter enable CEN=1
+TIM4->PSC = 0; // prescalar =0
+TIM4->ARR = 45000-1; // APB1 RUNS AT 45MHz
+TIM4->CR1 |= 0X04;// URS=1 only counter overflow and underflow will generate interrupt
+TIM4->DIER |= 0X01; // update interrupt enable UIE=1
+TIM4->EGR = 0X01; // reintiallize the counter UG=1
+	
+NVIC_EnableIRQ(TIM4_IRQn);	
+ while(1)
+ {
+     GPIOD->ODR^= (0X0F<<12); // PD12,PD13,PD14 AND PD15 IN OUTPUT MODE
+	   delay_ms(1000); // WAIT FOR 1000ms
+ }	 
+}	
+void delay_ms(int milli_sec)
+{
+
+  myticks =0;
+  TIM4->CR1 |= 0X01; // counter enable 
+	while(myticks<milli_sec); 
+	TIM4->CR1 &= 0X00;// counter disable
+	
+
+}	
+void TIM4_IRQHandler(void)
+{
+  myticks++;
+ TIM4->SR &= 0x00;
+
+}	

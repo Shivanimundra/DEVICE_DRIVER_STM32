@@ -1,0 +1,51 @@
+#include "Stm32f407xx.h"
+uint32_t value = 0;
+void adc_enable(void);
+void adc_read(void);
+void gpio_config(void);
+int count =0,i=0;
+int main()
+{
+	gpio_config();
+  adc_enable();
+	
+       while(1)
+    {
+
+       adc_read();
+
+    }	
+
+}	
+ void gpio_config()
+{
+ RCC->AHB1ENR |= 0X01; // port A clock enable
+ GPIOA->MODER |= 0X03;	// ANALOG MODE
+ GPIOA->PUPDR &= 0X00;	
+}	
+ void adc_enable()
+{
+	RCC->APB2ENR |= 0X100; // clock enable
+	ADC1->SMPR2 |= 0X1; // 15 CYCLES
+	//ADC1->CR1 |= 0X2000000; // RESOLUTION OF 8BIT
+  ADC1->CR2 |= 0X01;  //ADON = 1,CONT=1
+	//ADC1->CR2 |=0X01; // ADON=1
+  ADC->CCR |= 0X20000; // prescalar = 6
+  ADC1->SQR3 |= 0X00; // FOR 1ST CONVERSION & CHANNEL 0
+}	
+void adc_read()
+{
+	ADC1->CR2 |= 0X40000000;// SWSTART=1
+	while(!((ADC1->SR)&(0x02)))
+	{
+	  count++;
+	
+	}	
+  if((ADC1->SR)&(0x02)) // if EOC=1
+	{
+	  value = ADC1->DR; 
+		//ADC1->CR2 &= 0X00000000; // ADON = 0
+		//ADC1->SR &=0X01; // EOC=0 
+     i++;
+	}
+}	

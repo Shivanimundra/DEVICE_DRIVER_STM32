@@ -1,0 +1,56 @@
+#include"stm32f4xx.h"
+
+
+void lcd_cmd(unsigned char cmd)
+{
+  GPIOB->ODR = cmd;
+	GPIOA->ODR |= 0X00; // RS=0 FOR COMMAND
+	GPIOA->ODR |= 0X10; // SET ENABLE PIN
+	for(int i=0;i<1000;i++);
+	GPIOA->ODR &= 0X00; //RESET ENABLE PIN
+
+
+}	
+void lcd_data(unsigned char data)
+{
+  GPIOB->ODR = data;
+	GPIOA->ODR |= 0X01; //RS=1 FOR DATA
+	GPIOA->ODR |= 0X10; // ENABLE PIN SET
+	for(int i=0;i<1000;i++);
+	GPIOA->ODR &= 0X00;//ENABLE PIN RESET
+}	
+
+void gpio_config()
+{
+ RCC->AHB1ENR |= (0x00000003); 
+ 
+ GPIOB->MODER |=  (0X5555); // PB0-PB7 FOR 8-BIT MODE
+ GPIOB->OTYPER = 0X00;
+ GPIOB->OSPEEDR = 0X00;
+ GPIOA->MODER |= (0x05); // PA0= RS AND PA1=ENABLE
+ GPIOA->OTYPER = 0X00; 
+ GPIOA->OSPEEDR = 0X00;
+}	
+void lcd_init()
+{
+  lcd_cmd(0x33);
+	lcd_cmd(0x06);
+	lcd_cmd(0x0C);
+	lcd_cmd(0X01);
+	lcd_cmd(0X80);
+}	
+int main()
+{
+  gpio_config();
+	lcd_init();
+	
+	  while(1)
+	{
+	  lcd_data('s');
+		for(int i=0;i<1000;i++);
+	}	
+	
+}	
+
+
+	

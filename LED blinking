@@ -1,0 +1,19 @@
+#include "stm32f407xx.h"
+
+
+int main()
+{
+
+RCC->AHB1ENR |= (1<<3); // initialize the clock of GPIOD
+GPIOD->MODER |= (0X55<<24); // O/P MODE
+	
+	
+	
+       while(1)
+   {	
+      GPIOD->ODR^= (0X0F<<12);
+	    for(int i=0;i<5000;i++);
+
+  }
+
+}
